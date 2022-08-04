@@ -27,6 +27,5 @@ print(t.fetch(None))
 #       bug details inside of overload.__call__
 print(t.fetch())
 
-
-print(t.fetch(list()))
-print(t.fetch(tuple()))
+# print(t.fetch(list()))
+# print(t.fetch(tuple()))

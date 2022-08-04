@@ -1,11 +1,9 @@
 import inspect
 from typing import Callable, Optional
 
-table = dict()
 
-
-def debug_message(message: str):
-    print(f"[overload-debug]: {message}")
+def debug_message(message: str, prefix: str = None):
+    print(f"[overload][{prefix}]: {message}")
 
 
 class Overload:
@@ -14,7 +12,7 @@ class Overload:
     def __init__(self, separate_hash_table: dict = None, debug: bool = False):
         self.func: Optional[Callable] = None
         self.hash_table = separate_hash_table \
-            if separate_hash_table else table
+            if separate_hash_table else self.__DEFAULT_HASH_TABLE
         self.argspec_key_pattern = "{args}:{defaults}:{returns}"
         self.debug = debug if debug else False
 
@@ -78,7 +76,17 @@ class Overload:
         # Evaluation case
         # Return a wrapper that will return the
         # target function from the hash table
-        def call_function_by_hash_table_key(*a, **kw):
+        wrapper = self.get_mapped_function(function_hash_key)
+
+        if self.debug:
+            debug_message(message=f"{self.hash_table}", prefix="Hash table state")
+
+        return wrapper
+
+    def get_mapped_function(self, function_hash_key):
+        # Default wrapper
+        # You can customize it you want
+        def wrapper(*a, **kw):
             try:
                 return self.hash_table[function_hash_key](*a, **kw)
             except KeyError as e:
@@ -87,7 +95,4 @@ class Overload:
                 # In this case will be returns input wrapped func
                 return self.func(*a, **kw)
 
-        if self.debug:
-            debug_message(f"hash table state: {self.hash_table}")
-
-        return call_function_by_hash_table_key
+        return wrapper
